@@ -6,7 +6,6 @@ PLAYER = 'O'
 
 
 COMBOS=[[1,5,9],[3,5,7],[1,2,3],[4,5,6],[7,8,9],[1,4,7],[2,5,8],[3,6,9]]
-TWO_PLAYER = 1
 
 class Board:
 	_ar = [['_' for _ in range(3)] for _ in range(3)]
@@ -64,7 +63,6 @@ def ai_move():
 	return str(random.choice(BOARD.remaining) + 1)
 
 def setup():
-	global TWO_PLAYER
 	message = '''Welcome to tic-tac-toe!
 To make a move, input the number of the corresponding square:'''
 
@@ -101,6 +99,7 @@ def game(players):
 		return 'No one'
 	else:
 		return PLAYER
+
 def game_over(winner):
 	print(BOARD.format())
 	print("{} won!".format(winner))
