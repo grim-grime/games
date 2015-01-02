@@ -1,16 +1,19 @@
 import sys
+import random
 
 BLANK = '_'
-PLAYER = 'X'
+PLAYER = 'O'
 
 
 COMBOS=[[1,5,9],[3,5,7],[1,2,3],[4,5,6],[7,8,9],[1,4,7],[2,5,8],[3,6,9]]
-
+TWO_PLAYER = 1
 
 class Board:
 	_ar = [['_' for _ in range(3)] for _ in range(3)]
+	remaining = list(range(9))
 	def set(self,move):
 		idx = int(move) - 1
+		self.remaining.remove(idx)
 		self._ar[idx//3][idx%3] = PLAYER
 	def get(self,move):
 		idx = int(move) - 1
@@ -28,6 +31,8 @@ class Board:
 		return True
 	def refresh(self):
 		self._ar = [[BLANK for _ in range(3)] for _ in range(3)]
+		self.remaining = list(range(9))
+		PLAYER = 'O'
 	def __init__(self,string):
 		string = string.split()
 		self._ar = [string[3*i:3*i+3] for i in range(3)]
@@ -36,7 +41,6 @@ class Board:
 			if len(set([self.get(m) for m in combo])) <= 1 and self.get(combo[0]) != BLANK:
 				return True
 		return False
-
 
 
 
@@ -56,9 +60,11 @@ def change_player():
 	else:
 		PLAYER = 'O'
 
+def ai_move():
+	return str(random.choice(BOARD.remaining) + 1)
 
-
-def instructions():
+def setup():
+	global TWO_PLAYER
 	message = '''Welcome to tic-tac-toe!
 To make a move, input the number of the corresponding square:'''
 
@@ -67,19 +73,34 @@ To make a move, input the number of the corresponding square:'''
 	print(Board('1 2 3 4 5 6 7 8 9').format())
 	print('')
 
-def game():
-	while not BOARD.over():
+	print('Would you like to play against a human or computer?')
+	if any([x[0]=='c' for x in input().split()]):
+			print("Playing a computer!")
+			return 1
+	print("Playing a human!")
+	return 2
+
+def game(players):
+	turn = 0
+	while not BOARD.over() and turn < 9:
 		print(BOARD.format())
 		change_player()
-		while True:
-			move = input()
-			check_for_exit(move)
-			if BOARD.valid(move):
-				break
+		turn += 1
+		if turn %2 == 0 and players == 1:
+			move = ai_move()
+		else:
+			while True:
+				move = input()
+				check_for_exit(move)
+				if BOARD.valid(move):
+					break
 		BOARD.set(move)
 		print('')
-	return PLAYER
 
+	if turn == 9:
+		return 'No one'
+	else:
+		return PLAYER
 def game_over(winner):
 	print(BOARD.format())
 	print("{} won!".format(winner))
@@ -93,7 +114,7 @@ def game_over(winner):
 
 
 if __name__ == '__main__':
-	instructions()
+	players = setup()
 	while True:
-		winner = game()
+		winner = game(players)
 		game_over(winner)
