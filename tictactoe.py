@@ -74,7 +74,7 @@ To make a move, input the number of the corresponding square:'''
 	print('')
 
 	print('Would you like to play against a human or computer?')
-	if any([x[0]=='c' for x in input().split()]):
+	if any([x[0].lower()=='c' for x in input().split()]):
 			print("Playing a computer!")
 			return 1
 	print("Playing a human!")
