@@ -2,10 +2,13 @@ import sys
 import random
 import copy
 import operator
+from timeit import default_timer as time
+import math
+import random
+
 
 BLANK = '_'
 PLAYER = 'O'
-
 
 COMBOS=[[1,5,9],[3,5,7],[1,2,3],[4,5,6],[7,8,9],[1,4,7],[2,5,8],[3,6,9]]
 
@@ -29,6 +32,7 @@ class Board:
 			return False
 		return True
 	def refresh(self):
+		global PLAYER
 		self._ar = [[BLANK for _ in range(3)] for _ in range(3)]
 		self.remaining = list(range(9))
 		PLAYER = 'O'
@@ -64,8 +68,8 @@ def other(player):
 		return 'O'
 	else:
 		return 'X'
-
-def ai_move(board=BOARD,player=PLAYER):
+		
+def ai_move(alpha,beta,depth,board,player):
 	winner = board.get_winner()
 	if winner:
 		if winner == PLAYER:
@@ -77,26 +81,32 @@ def ai_move(board=BOARD,player=PLAYER):
 	else:
 		if player == PLAYER:
 			bestval, bestmove = -2, -1
-			for move in [i+1 for i in board.remaining]:
+			for move in sorted([i+1 for i in board.remaining],key=lambda x: random.random()):
 				newboard = copy.deepcopy(board)
 				newboard.set(move,player)
-				newval, newmove = ai_move(newboard,other(player))
+				newval, newmove = ai_move(alpha,beta,depth-1,newboard,other(player))
 				if newval > bestval:
 					bestval = newval
 					bestmove = move
+				alpha = max(alpha,newval)
+				if beta <= alpha:
+					break
 			return (bestval, bestmove)
 				
 				
 
 		else:
 			bestval, bestmove = 2, -1
-			for move in [i+1 for i in board.remaining]:
+			for move in sorted([i+1 for i in board.remaining],key=lambda x: random.random()):
 				newboard = copy.deepcopy(board)
 				newboard.set(move,player)
-				newval, newmove = ai_move(newboard,other(player))
+				newval, newmove = ai_move(alpha,beta,depth-1,newboard,other(player))
 				if newval < bestval:
 					bestval = newval
 					bestmove = move
+				beta = min(beta,newval)
+				if beta <= alpha:
+					break
 			return (bestval, bestmove)
 
 
@@ -135,9 +145,12 @@ def game(players):
 					if BOARD.valid(move):
 						break
 			else:
-				print('Thinking...')
-				move = ai_move()
+				start = time()
+				move = ai_move(float('-inf'),float('inf'),4,BOARD,PLAYER)
 				move = move[1]
+				end = time()
+				t = end - start
+				rounded_t = round(t,-math.floor(math.log10(t))+2)
 			human_turn ^= True
 		else:
 			while True:
